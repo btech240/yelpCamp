@@ -2,6 +2,7 @@
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
+const ejsMate = require('ejs-mate');
 const Campground = require('./models/campground');
 const methodOverride = require('method-override');
 
@@ -19,7 +20,8 @@ async function main() {
 // Set express as app framework
 const app = express();
 
-// Set middleware, EJS to handle html
+// Set middleware and EJS to handle html
+app.engine('ejs', ejsMate)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
@@ -67,6 +69,7 @@ app.get('/campgrounds/:id', async (req, res) => {
     res.render('campgrounds/show', { campground })
 });
 
+// Deletes campground with the given ID
 app.delete('/campgrounds/:id', async (req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
