@@ -32,8 +32,6 @@ const seedDB = async () => {
         })
         await camp.save()
     }
-    const c = new Campground({title: 'purple field'});
-    await c.save()
 }
 
 seedDB().then(() => {
