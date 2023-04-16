@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
-const Joi = require('joi');
+const  { campgroundSchema } = require('./schemas.js');
 const catchAsync = require('./utilities/catchAsync');
 const ExpressError = require('./utilities/ExpressError');
 const Campground = require('./models/campground');
@@ -30,6 +30,20 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
+// Set middleware Joi validation for campgroundSchema
+const validateCampground = (req, res, next) => {
+    // Destructure form data to validate against
+    const { error } = campgroundSchema.validate(req.body);
+    // If an error is found, map over the details to make a single string message before
+    // passing it as a new ExpressError
+    if(error) {
+        const msg = error.details.map(el => el.message).join(',');
+        throw new ExpressError(msg, 400)
+    } else {
+        next();
+    }
+}
+
 // Home page
 app.get('/', (req, res) => {
     res.render('home');
@@ -53,34 +67,14 @@ app.get('/campgrounds/:id/edit', catchAsync(async (req, res) => {
 }));
 
 // Edit the campground with the given ID
-app.put('/campgrounds/:id', catchAsync(async (req, res) => {
+app.put('/campgrounds/:id', validateCampground, catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });
     res.redirect(`/campgrounds/${campground._id}`);
 }));
 
 // Process new campground form, saving it to the database
-app.post('/campgrounds', catchAsync(async (req, res, next) => {
-    // if(!req.body.campground) throw new ExpressError('Invalid campground data', 400);
-
-    // create Joi schema to validate the new campground
-    const campgroundSchema = Joi.object({
-        campground: Joi.object({
-            title: Joi.string().required(),
-            price: Joi.number().required().min(0),
-            image: Joi.string().required(),
-            location: Joi.string().required(),
-            description: Joi.string().required()
-        }).required()
-    });
-    // Check the input fields
-    const { error } = campgroundSchema.validate(req.body);
-    // If an error is found, do not create the campground
-    if(error) {
-        const msg = error.details.map(el => el.message).join(',');
-        throw new ExpressError(msg, 400)
-    }
-    console.log(result);
+app.post('/campgrounds', validateCampground, catchAsync(async (req, res, next) => {
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
@@ -99,7 +93,7 @@ app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
     res.redirect('/campgrounds');
 }));
 
-// This call seeds our database with data in the seed folder
+// This call seeds our database with data in the seed folder - comment out unless we need to seed the database
 // app.get('/makecampground', async (req, res) => {
 //     const camp = new Campground({ title: 'My Backyard', description: 'cheap camping' });
 //     await camp.save();
