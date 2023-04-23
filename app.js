@@ -45,7 +45,9 @@ const validateCampground = (req, res, next) => {
     }
 }
 
+// Set middleware JOI validation for reviewSchema
 const validateReview = (req, res, next) => {
+    // Destructure form data to validate against
     const { error } = reviewSchema.validate(req.body);
     if(error){
         const msg = error.details.map(el => el.message).join(',');
@@ -93,7 +95,7 @@ app.post('/campgrounds', validateCampground, catchAsync(async (req, res, next) =
 
 // Finds campground by ID and shows details
 app.get('/campgrounds/:id', catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id);
+    const campground = await Campground.findById(req.params.id).populate('reviews');
     res.render('campgrounds/show', { campground })
 }));
 
@@ -104,6 +106,7 @@ app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
     res.redirect('/campgrounds');
 }));
 
+// Process new review form, validating and saving
 app.post('/campgrounds/:id/reviews', validateReview, catchAsync(async (req, res) => {
     const campground = await Campground.findById(req.params.id);
     const review = new Review(req.body.review);
