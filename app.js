@@ -33,6 +33,8 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+// Serve the static directories - using join to serve all directories within public
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Use express router middleware
 app.use('/campgrounds', campgrounds);
