@@ -11,10 +11,11 @@ const methodOverride = require('method-override');
 const Review = require('./models/review');
 
 const campgrounds = require('./routes/campgrounds');
+const reviews = require('./routes/reviews');
 
 // Run connection to mongodb
 main().catch((err) => {
-    console.log("OH NO ERROR!!");
+    console.log("Error Connecting to MongoDB.");
     console.log(err);
 });
 // Function to await calls to mongodb
@@ -33,44 +34,14 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
-
+// Use express router middleware
 app.use('/campgrounds', campgrounds);
-
+app.use('/campgrounds/:id/reviews', reviews);
 
 // Home Page - Needs Fixed
 app.get('/', (req, res) => {
     res.render('home');
 });
-
-// Set middleware JOI validation for reviewSchema
-const validateReview = (req, res, next) => {
-    // Destructure form data to validate against
-    const { error } = reviewSchema.validate(req.body);
-    if(error){
-        const msg = error.details.map(el => el.message).join(',');
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
-
-// Route to delete a campground review by pulling a review ID out of the campground
-app.delete('/campgrounds/:id/reviews/:reviewId', catchAsync(async (req, res) => {
-    const { id, reviewId } = req.params;
-    await Campground.findByIdAndUpdate(id, {$pull: {reviews: reviewId} });
-    await Review.findByIdAndDelete(reviewId);
-    res.redirect(`/campgrounds/${id}`);
-}));
-
-// Process new review form, validating and saving
-app.post('/campgrounds/:id/reviews', validateReview, catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id);
-    const review = new Review(req.body.review);
-    campground.reviews.push(review);
-    await review.save();
-    await campground.save();
-    res.redirect(`/campgrounds/${campground._id}`);
-}));
 
 // This call seeds our database with data in the seed folder - comment out unless we need to seed the database
 // app.get('/makecampground', async (req, res) => {

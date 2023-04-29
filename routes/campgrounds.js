@@ -21,7 +21,6 @@ const validateCampground = (req, res, next) => {
     }
 }
 
-
 // Show all campgrounds
 router.get('/', async (req, res) => {
     const campgrounds = await Campground.find({});
@@ -66,4 +65,5 @@ router.delete('/:id', catchAsync(async (req, res) => {
     res.redirect('/campgrounds');
 }));
 
+// Export this router for use in app.js
 module.exports = router;
