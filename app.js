@@ -5,12 +5,11 @@ const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
 const session = require('express-session');
 const flash = require('connect-flash');
-const  { campgroundSchema, reviewSchema } = require('./schemas.js');
-const catchAsync = require('./utilities/catchAsync');
 const ExpressError = require('./utilities/ExpressError');
-const Campground = require('./models/campground');
 const methodOverride = require('method-override');
-const Review = require('./models/review');
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+const User = require('./models/user');
 
 const campgrounds = require('./routes/campgrounds');
 const reviews = require('./routes/reviews');
@@ -49,14 +48,32 @@ const sessionConfig = {
         maxAge: 1000 * 60 * 60 * 24 * 7
     }
 }
+
+// Create session and cookie
 app.use(session(sessionConfig));
 app.use(flash());
+
+// Initialize passport and use local authentication
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+
+// 
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 
 // Middleware to send any message in flash to the route if there is one
 app.use((req, res, next) => {
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
+})
+
+app.get('/fakeuser', async (req,res) => {
+    const user = new User({email: 'brent@leadgen4.com', username: 'brent'});
+    const newUser = await User.register(user, 'potato');
+    res.send(newUser);
 })
 
 // Use express router middleware
