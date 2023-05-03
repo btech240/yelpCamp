@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const passport = require('passport');
 const catchAsync = require('../utilities/catchAsync');
 const User = require('../models/user');
 
@@ -21,5 +22,16 @@ router.post('/register', catchAsync(async (req, res) => {
         res.redirect('/register');
     }
 }));
+
+// Route to login page
+router.get('/login', (req, res) => {
+    res.render('users/login');
+});
+
+// Route to process user log in
+router.post('/login', passport.authenticate('local', { failureFlash: true, failureRedirect: '/login' }), (req, res) => {
+    req.flash('success', 'Welcome back');
+    res.redirect('/campgrounds');
+})
 
 module.exports = router;
