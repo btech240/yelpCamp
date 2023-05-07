@@ -53,6 +53,7 @@ router.put('/:id', isLoggedIn, validateCampground, catchAsync(async (req, res) =
 // Process new campground form, saving it to the database, protect post route with isLoggedIn middleware
 router.post('/', isLoggedIn, validateCampground, catchAsync(async (req, res, next) => {
     const campground = new Campground(req.body.campground);
+    campground.author = req.user._id;
     await campground.save();
     req.flash('success', 'Successfully created a new campground');
     res.redirect(`/campgrounds/${campground._id}`);
@@ -60,7 +61,7 @@ router.post('/', isLoggedIn, validateCampground, catchAsync(async (req, res, nex
 
 // Finds campground by ID and shows details
 router.get('/:id', catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id).populate('reviews');
+    const campground = await Campground.findById(req.params.id).populate('reviews').populate('author');
     if(!campground) {
         req.flash('error', 'Campground was not found.');
         return res.redirect('/campgrounds');
