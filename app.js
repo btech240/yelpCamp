@@ -72,12 +72,6 @@ app.use((req, res, next) => {
     next();
 })
 
-app.get('/fakeuser', async (req,res) => {
-    const user = new User({email: 'brent@leadgen4.com', username: 'brent'});
-    const newUser = await User.register(user, 'potato');
-    res.send(newUser);
-})
-
 // Use express router middleware
 app.use('/', userRoutes);
 app.use('/campgrounds', campgroundRoutes);
