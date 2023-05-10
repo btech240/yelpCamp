@@ -1,4 +1,5 @@
 const express = require('express');
+const { validateReview } = require('../middleware'); 
 // Require Express router, with params passed
 const router = express.Router({ mergeParams: true } ) ;
 const { campgroundSchema, reviewSchema } = require('../schemas.js');
@@ -11,17 +12,6 @@ const catchAsync = require('../utilities/catchAsync');
 const Campground = require('../models/campground');
 const Review = require('../models/review');
 
-// Set middleware JOI validation for reviewSchema
-const validateReview = (req, res, next) => {
-    // Destructure form data to validate against
-    const { error } = reviewSchema.validate(req.body);
-    if(error){
-        const msg = error.details.map(el => el.message).join(',');
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
 
 // Route to delete a campground review by pulling a review ID out of the campground
 router.delete('/:reviewId', catchAsync(async (req, res) => {
