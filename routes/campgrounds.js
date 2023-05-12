@@ -5,6 +5,7 @@ const  { campgroundSchema, reviewSchema } = require('../schemas.js');
 const { isLoggedIn, isAuthor, validateCampground } = require('../middleware.js');
 const ExpressError = require('../utilities/ExpressError');
 const Campground = require('../models/campground');
+const { populate } = require('../models/review');
 
 // Show all campgrounds
 router.get('/', async (req, res) => {
@@ -47,7 +48,12 @@ router.post('/', isLoggedIn, validateCampground, catchAsync(async (req, res, nex
 
 // Finds campground by ID and shows details
 router.get('/:id', catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id).populate('reviews').populate('author');
+    const campground = await Campground.findById(req.params.id).populate({
+        path: 'reviews', // populate the reviews, and the author of the review
+        populate: {
+            path: 'author'
+        }
+    }).populate('author'); // populate the author of the campground
     if(!campground) {
         req.flash('error', 'Campground was not found.');
         return res.redirect('/campgrounds');
