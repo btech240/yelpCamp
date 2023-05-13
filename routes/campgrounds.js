@@ -3,12 +3,18 @@ const router = express.Router();
 const catchAsync = require('../utilities/catchAsync');
 const { isLoggedIn, isAuthor, validateCampground } = require('../middleware.js');
 const campgrounds = require('../controllers/campgrounds');
+const multer = require('multer');
+const upload = multer({ dest : 'uploads/' });
+
 
 router.route('/')
     // Show all campgrounds
     .get(catchAsync(campgrounds.index))
     // Process new campground form, saving it to the database, protect post route with isLoggedIn middleware
-    .post(isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground))
+    // .post(isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground))
+    .post(upload.array('image'), (req, res) => {
+        console.log(req.body, req.files);
+    });
 
 // New campground form, protect login form with isLoggedIn middleware
 // New route needs to be placed before the /:id routes or it will think it is /:id/new and create an error
