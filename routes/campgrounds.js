@@ -22,7 +22,7 @@ router.get('/new', isLoggedIn, campgrounds.renderNewForm);
 
 router.route('/:id')
     // Edit the campground with the given ID, edit route with isLoggedIn middleware
-    .put(isLoggedIn, isAuthor, validateCampground, catchAsync(campgrounds.editCampground))
+    .put(isLoggedIn, isAuthor, upload.array('image'), validateCampground, catchAsync(campgrounds.editCampground))
     // Finds campground by ID and shows details
     .get(catchAsync(campgrounds.show))
     // Deletes campground with the given ID, protect delete route with isLoggedIn middleware
