@@ -47,11 +47,13 @@ app.use(mongoSanitize());
 
 // Create session and cookie
 const sessionConfig = {
+    name: 'session_yc',
     secret: 'thisshouldbebetter',
     resave: false,
     saveUninitialized: true,
     cookie: {
         httpOnly: true,
+        // secure: true, // configure for secure session when deployed live
         expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
         maxAge: 1000 * 60 * 60 * 24 * 7
     }
