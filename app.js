@@ -16,6 +16,7 @@ const methodOverride = require('method-override');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
+const helmet = require('helmet');
 
 const mongoSanitize = require('express-mongo-sanitize');
 
@@ -64,6 +65,7 @@ const sessionConfig = {
 // Create session and cookie
 app.use(session(sessionConfig));
 app.use(flash());
+app.use(helmet());
 
 // Initialize passport and use local authentication
 app.use(passport.initialize());
